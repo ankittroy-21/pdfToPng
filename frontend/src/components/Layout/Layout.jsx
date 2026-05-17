@@ -4,6 +4,8 @@ import PdfPng from "../../pages/PdfPng";
 import ImageWebp from "../../pages/ImageWbp";
 import ImageJpg from "../../pages/ImageJpg";
 import RemoveBg from "../../pages/RemoveBg";
+import ImageUpscale from "../../pages/ImageUpscale";
+import { Outlet, useLocation } from "react-router-dom";
 import ImageCompress from "../../pages/ImageCompress";
 import RotateFlip from "../../pages/RotateFlip";
 import ImageBase64 from "../../pages/ImageBase64";
@@ -45,6 +47,8 @@ const Layout = () => {
         return <ImageJpg />;
       case "remove-bg":
         return <RemoveBg />;
+      case "image-upscale":
+        return <ImageUpscale />;
       case "image-compress":
         return <ImageCompress />;
       case "rotate-flip":
@@ -55,7 +59,6 @@ const Layout = () => {
         return <PdfPng />;
     }
   };
-
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar

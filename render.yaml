@@ -8,23 +8,3 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:${PORT:-5000} --workers 1 --timeout 120 main:app
-    envVars:
-      - key: PORT
-        value: 5000
-      - key: ALLOWED_ORIGINS
-        # ⚠️  Replace with your actual Render frontend URL after deploying the Static Site below
-        value: https://your-frontend.onrender.com
-
-  # ─────────────────────────────────────────────
-  # Frontend — Vite React App (Static Site)
-  # ─────────────────────────────────────────────
-  - type: web
-    name: pdftopng-frontend
-    runtime: static
-    rootDir: frontend
-    buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    envVars:
-      - key: VITE_API_URL
-        # ⚠️  Replace with your actual Render backend URL after deploying the Web Service above
-        value: https://your-backend.onrender.com

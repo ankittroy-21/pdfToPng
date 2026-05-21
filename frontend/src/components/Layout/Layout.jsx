@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, Outlet } from "react-router-dom";
 import Sidebar from "../Sidebar/Sidebar";
+ feature/pdf-tools
+import { Outlet, useLocation } from "react-router-dom";
+
 import PdfPng from "../../pages/PdfPng";
 import ImageWebp from "../../pages/ImageWbp";
 import ImageJpg from "../../pages/ImageJpg";
 import RemoveBg from "../../pages/RemoveBg";
 import ImageUpscale from "../../pages/ImageUpscale";
-import { Outlet, useLocation } from "react-router-dom";
 import ImageCompress from "../../pages/ImageCompress";
 import RotateFlip from "../../pages/RotateFlip";
 import ImageBase64 from "../../pages/ImageBase64";
 import ImageGrayScale from "../../pages/ImageGrayScale";
+main
 import { Menu } from "lucide-react";
 
 const Layout = () => {
@@ -18,16 +21,22 @@ const Layout = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   const location = useLocation();
+ feature/pdf-tools
+
   const activePath = location.pathname.substring(1);
+ main
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
+
       if (window.innerWidth > 768) {
         setIsMobileMenuOpen(false);
       }
     };
+
     window.addEventListener("resize", handleResize);
+
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
@@ -39,38 +48,15 @@ const Layout = () => {
     setIsMobileMenuOpen(false);
   };
 
-  const renderContent = () => {
-    switch (activePath) {
-      case "pdf-to-png":
-        return <PdfPng />;
-      case "image-to-webp":
-        return <ImageWebp />;
-      case "image-to-jpg":
-        return <ImageJpg />;
-      case "image-to-grayscale":
-        return <ImageGrayScale />;
-      case "remove-bg":
-        return <RemoveBg />;
-      case "image-upscale":
-        return <ImageUpscale />;
-      case "image-compress":
-        return <ImageCompress />;
-      case "rotate-flip":
-        return <RotateFlip />;
-      case "image-to-base64":
-        return <ImageBase64 />;
-      default:
-        return <PdfPng />;
-    }
-  };
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar
-        activeTab={activePath}
+        activeTab={location.pathname.substring(1)}
         isMobileMenuOpen={isMobileMenuOpen}
         isMobile={isMobile}
         onClose={closeMobileMenu}
       />
+
       <main className="flex-1 overflow-y-auto">
         {isMobile && (
           <header className="bg-white shadow-sm sticky top-0 z-30">
@@ -81,13 +67,19 @@ const Layout = () => {
               >
                 <Menu className="w-6 h-6" />
               </button>
+
               <h1 className="text-lg font-semibold text-blue-400">
                 pdfToPng
               </h1>
+
               <div className="w-10"></div>
             </div>
           </header>
         )}
+feature/pdf-tools
+
+
+ main
         <div className="min-h-full flex justify-center items-center py-8">
           <Outlet />
         </div>

@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import "./App.css";
+
 import PdfMerge from "./pages/PdfMerge";
 import PdfSign from "./pages/PdfSign";
 import Layout from "./components/Layout/Layout";
@@ -18,37 +19,40 @@ import ImageDpi from "./pages/ImageDpi";
 import ImageGrayScale from "./pages/ImageGrayScale";
 import ImageMetadata from "./pages/ImageMetadata";
 import ImageBase64 from "./pages/ImageBase64";
+import ErrorBoundary from "./ErrorBoundary";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} /> 
+    <ErrorBoundary>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
 
-      {/* All tools share the Layout with the Sidebar */}
-      <Route element={<Layout />}>
-      
-        <Route path="/pdf-to-png" element={<PdfPng />} />
-        <Route path="/pdf-to-word" element={<PdfDocx />} />
-        <Route path="/image-to-webp" element={<ImageWebp />} />
-        <Route path="/image-to-jpg" element={<ImageJpg />} />
-        <Route path="/image-to-grayscale" element={<ImageGrayScale />} />
-        <Route path="/remove-bg" element={<RemoveBg />} />
-        <Route path="/rotate-flip" element={<RotateFlip />} />
-        <Route path="/image-compress" element={<ImageCompress />} />
-        <Route path="/image-resize" element={<ImageResize />} />
-        <Route path="/image-upscale" element={<ImageUpscale />} />
-        <Route path="/image-dpi" element={<ImageDpi />} />
-        <Route path="/image-metadata" element={<ImageMetadata />} />
- feature/pdf-tools
-        <Route path="/image-to-pdf" element={<ImagePdf />} />
-        <Route path="/pdf-merge" element={<PdfMerge />} />
-        <Route path="/pdf-sign" element={<PdfSign />} />
-        <Route path="/pdf-sign" element={<div>PDF SIGN TEST PAGE</div>} />
+        {/* All tools share the Layout with the Sidebar */}
+        <Route element={<Layout />}>
+          <Route path="/pdf-to-png" element={<PdfPng />} />
+          <Route path="/pdf-to-word" element={<PdfDocx />} />
 
-        <Route path="/image-to-base64" element={<ImageBase64 />} />
- main
-      </Route>
-    </Routes>
+          <Route path="/image-to-pdf" element={<ImagePdf />} />
+          <Route path="/pdf-merge" element={<PdfMerge />} />
+          <Route path="/pdf-sign" element={<PdfSign />} />
+
+          <Route path="/image-to-webp" element={<ImageWebp />} />
+          <Route path="/image-to-jpg" element={<ImageJpg />} />
+          <Route
+            path="/image-to-grayscale"
+            element={<ImageGrayScale />}
+          />
+          <Route path="/remove-bg" element={<RemoveBg />} />
+          <Route path="/rotate-flip" element={<RotateFlip />} />
+          <Route path="/image-compress" element={<ImageCompress />} />
+          <Route path="/image-resize" element={<ImageResize />} />
+          <Route path="/image-upscale" element={<ImageUpscale />} />
+          <Route path="/image-dpi" element={<ImageDpi />} />
+          <Route path="/image-metadata" element={<ImageMetadata />} />
+          <Route path="/image-to-base64" element={<ImageBase64 />} />
+        </Route>
+      </Routes>
+    </ErrorBoundary>
   );
 }
 

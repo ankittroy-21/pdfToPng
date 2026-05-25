@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback } from "react";
 
-export default function MergePdf() {
+function MergePdf() {
   const [files, setFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
+  const [statusType, setStatusType] = useState("info"); // info | success | error
   const inputRef = useRef(null);
 
   const addFiles = (incoming) => {
@@ -12,10 +13,11 @@ export default function MergePdf() {
       (f) => f.type === "application/pdf"
     );
     if (pdfs.length === 0) {
-      setError("Only PDF files are accepted.");
+      setStatusMessage("Only PDF files are accepted.");
+      setStatusType("error");
       return;
     }
-    setError("");
+    setStatusMessage("");
     setFiles((prev) => {
       const existingNames = new Set(prev.map((f) => f.name));
       const unique = pdfs.filter((f) => !existingNames.has(f.name));
@@ -52,19 +54,22 @@ export default function MergePdf() {
 
   const handleMerge = async () => {
     if (files.length < 2) {
-      setError("Please add at least 2 PDF files to merge.");
+      setStatusMessage("Please add at least 2 PDF files to merge.");
+      setStatusType("error");
       return;
     }
-    setError("");
+    setStatusMessage("");
     setIsLoading(true);
+    setStatusType("info");
+
     try {
       const formData = new FormData();
       files.forEach((f) => formData.append("files", f));
 
-      const res = await fetch("http://localhost:5000/merge-pdf", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/merge-pdf`,
+        { method: "POST", body: formData }
+      );
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -76,404 +81,181 @@ export default function MergePdf() {
       const a = document.createElement("a");
       a.href = url;
       a.download = "merged.pdf";
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      setStatusMessage("PDFs merged successfully! File downloaded.");
+      setStatusType("success");
       setFiles([]);
     } catch (err) {
-      setError(err.message);
+      setStatusMessage(`Error: ${err.message}`);
+      setStatusType("error");
     } finally {
       setIsLoading(false);
+      setTimeout(() => setStatusMessage(""), 5000);
     }
   };
 
   return (
-    <div style={styles.page}>
-      <div style={styles.card}>
-        {/* Header */}
-        <div style={styles.header}>
-          <svg style={styles.headerIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14,2 14,8 20,8"/>
-            <line x1="12" y1="18" x2="12" y2="12"/>
-            <line x1="9" y1="15" x2="15" y2="15"/>
-          </svg>
-          <div>
-            <h1 style={styles.title}>Merge PDFs</h1>
-            <p style={styles.subtitle}>Combine multiple PDF files into one. Drag to reorder.</p>
-          </div>
-        </div>
+    <div className="w-full max-w-[600px] mx-auto p-10 text-center flex flex-col justify-center items-center bg-gradient-to-br from-[#f6f8fa] to-white rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] overflow-hidden">
+      
+      {/* Title — matches ToolPageTemplate exactly */}
+      <h1 className="mb-10 text-[#1a1a2e] text-5xl font-bold tracking-tight relative inline-block after:content-[''] after:absolute after:w-[60px] after:h-1 after:bg-gradient-to-r after:from-[#4361ee] after:to-[#7209b7] after:-bottom-2.5 after:left-1/2 after:-translate-x-1/2 after:rounded-sm">
+        Merge PDFs
+      </h1>
 
-        {/* Drop Zone */}
-        <div
-          style={{
-            ...styles.dropZone,
-            ...(isDragging ? styles.dropZoneActive : {}),
-          }}
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          onDragLeave={onDragLeave}
-          onClick={() => inputRef.current?.click()}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            accept="application/pdf"
-            multiple
-            style={{ display: "none" }}
-            onChange={(e) => addFiles(e.target.files)}
-          />
-          <svg style={styles.uploadIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <polyline points="16 16 12 12 8 16"/>
-            <line x1="12" y1="12" x2="12" y2="21"/>
-            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-          </svg>
-          <p style={styles.dropText}>
-            {isDragging ? "Drop your PDFs here" : "Drag & drop PDFs here"}
-          </p>
-          <p style={styles.dropSub}>or click to browse files</p>
-          <span style={styles.badge}>PDF only · Multiple files allowed</span>
-        </div>
+      {/* Drop Zone */}
+      <div
+        className={`w-full border-2 border-dashed rounded-xl p-10 flex flex-col items-center gap-2 cursor-pointer transition-all duration-200 mb-6
+          ${isDragging
+            ? "border-[#4361ee] bg-blue-50"
+            : "border-gray-300 bg-[#fafbfc] hover:border-[#4361ee] hover:bg-blue-50"
+          }`}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onClick={() => inputRef.current?.click()}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept="application/pdf"
+          multiple
+          className="hidden"
+          onChange={(e) => addFiles(e.target.files)}
+        />
 
-        {/* Error */}
-        {error && (
-          <div style={styles.errorBox}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={styles.errorIcon}>
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="12" y1="8" x2="12" y2="12"/>
-              <line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-            {error}
-          </div>
-        )}
+        {/* Upload icon */}
+        <svg className="w-16 h-16 text-[#4361ee] mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round" />
+          <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round" />
+          <line x1="12" y1="18" x2="12" y2="12" strokeLinecap="round" />
+          <line x1="9" y1="15" x2="15" y2="15" strokeLinecap="round" />
+        </svg>
 
-        {/* File List */}
-        {files.length > 0 && (
-          <div style={styles.fileSection}>
-            <div style={styles.fileSectionHeader}>
-              <span style={styles.fileCount}>{files.length} file{files.length !== 1 ? "s" : ""} selected</span>
-              <button style={styles.clearBtn} onClick={() => setFiles([])}>Clear all</button>
-            </div>
-            <ul style={styles.fileList}>
-              {files.map((file, i) => (
-                <li key={file.name} style={styles.fileItem}>
-                  <div style={styles.fileOrder}>{i + 1}</div>
-                  <svg style={styles.fileIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
-                  </svg>
-                  <span style={styles.fileName} title={file.name}>{file.name}</span>
-                  <span style={styles.fileSize}>{(file.size / 1024).toFixed(1)} KB</span>
-                  <div style={styles.fileActions}>
-                    <button
-                      style={styles.arrowBtn}
-                      onClick={() => moveFile(i, -1)}
-                      disabled={i === 0}
-                      title="Move up"
-                    >▲</button>
-                    <button
-                      style={styles.arrowBtn}
-                      onClick={() => moveFile(i, 1)}
-                      disabled={i === files.length - 1}
-                      title="Move down"
-                    >▼</button>
-                    <button
-                      style={styles.removeBtn}
-                      onClick={() => removeFile(i)}
-                      title="Remove"
-                    >✕</button>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Merge Button */}
-        <button
-          style={{
-            ...styles.mergeBtn,
-            ...(files.length < 2 || isLoading ? styles.mergeBtnDisabled : {}),
-          }}
-          onClick={handleMerge}
-          disabled={files.length < 2 || isLoading}
-        >
-          {isLoading ? (
-            <>
-              <span style={styles.spinner} />
-              Merging…
-            </>
-          ) : (
-            <>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: 18, height: 18 }}>
-                <path d="M8 6H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-3"/>
-                <polyline points="15 3 12 0 9 3"/>
-                <line x1="12" y1="0" x2="12" y2="13"/>
-              </svg>
-              Merge PDFs
-              {files.length >= 2 && <span style={styles.countPill}>{files.length}</span>}
-            </>
-          )}
-        </button>
-
-        {files.length === 1 && (
-          <p style={styles.hint}>Add at least one more PDF to enable merging.</p>
-        )}
+        <p className="text-[#1a1a2e] font-semibold text-lg">
+          {isDragging ? "Drop your PDFs here" : "Choose PDF files or drag & drop here"}
+        </p>
+        <p className="text-gray-400 text-sm">Click to browse or drop your PDF files</p>
+        <span className="mt-2 text-xs bg-gray-100 text-gray-500 rounded-full px-3 py-1 font-medium">
+          PDF only · Multiple files supported
+        </span>
       </div>
 
-      <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-      `}</style>
+      {/* File List */}
+      {files.length > 0 && (
+        <div className="w-full mb-6 flex flex-col gap-2">
+          <div className="flex justify-between items-center mb-1">
+            <span className="text-sm font-semibold text-gray-600">
+              {files.length} file{files.length !== 1 ? "s" : ""} selected
+            </span>
+            <button
+              onClick={() => setFiles([])}
+              className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+            >
+              Clear all
+            </button>
+          </div>
+
+          <ul className="flex flex-col gap-2">
+            {files.map((file, i) => (
+              <li
+                key={file.name}
+                className="flex items-center gap-3 bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-sm"
+              >
+                {/* Order badge */}
+                <span className="w-6 h-6 rounded-full bg-gradient-to-r from-[#4361ee] to-[#7209b7] text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                  {i + 1}
+                </span>
+
+                {/* File icon */}
+                <svg className="w-4 h-4 text-[#4361ee] flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" strokeLinecap="round" strokeLinejoin="round" />
+                  <polyline points="14,2 14,8 20,8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+
+                {/* Name */}
+                <span className="flex-1 text-sm text-gray-700 text-left truncate" title={file.name}>
+                  {file.name}
+                </span>
+
+                {/* Size */}
+                <span className="text-xs text-gray-400 flex-shrink-0">
+                  {(file.size / 1024).toFixed(1)} KB
+                </span>
+
+                {/* Controls */}
+                <div className="flex gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => moveFile(i, -1)}
+                    disabled={i === 0}
+                    className="w-6 h-6 border border-gray-200 rounded text-xs text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Move up"
+                  >▲</button>
+                  <button
+                    onClick={() => moveFile(i, 1)}
+                    disabled={i === files.length - 1}
+                    className="w-6 h-6 border border-gray-200 rounded text-xs text-gray-500 hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                    title="Move down"
+                  >▼</button>
+                  <button
+                    onClick={() => removeFile(i)}
+                    className="w-6 h-6 rounded text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    title="Remove"
+                  >✕</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Merge Button — matches ToolPageTemplate button exactly */}
+      <button
+        onClick={handleMerge}
+        disabled={files.length < 2 || isLoading}
+        className="bg-gradient-to-r from-[#4361ee] to-[#3b82f6] text-white py-3.5 px-8 border-none rounded-lg cursor-pointer text-lg font-semibold transition-all duration-300 shadow-[0_4px_12px_rgba(59,130,246,0.25)] tracking-wide w-full max-w-[300px] mx-auto hover:enabled:-translate-y-0.5 hover:enabled:shadow-[0_6px_16px_rgba(59,130,246,0.35)] active:enabled:translate-y-0.5 active:enabled:shadow-[0_2px_8px_rgba(59,130,246,0.2)] disabled:bg-gradient-to-r disabled:from-[#cbd5e1] disabled:to-[#e2e8f0] disabled:text-[#94a3b8] disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
+      >
+        {isLoading ? (
+          <>
+            <span className="inline-block w-5 h-5 border-[3px] border-[rgba(255,255,255,0.3)] rounded-full border-t-white animate-spin"></span>
+            Merging...
+          </>
+        ) : (
+          <>
+            Merge PDFs
+            {files.length >= 2 && (
+              <span className="bg-white/30 rounded-full px-2 py-0.5 text-xs font-bold">
+                {files.length}
+              </span>
+            )}
+          </>
+        )}
+      </button>
+
+      {/* Hint when only 1 file */}
+      {files.length === 1 && (
+        <p className="mt-3 text-xs text-[#4361ee]">
+          Add at least one more PDF to enable merging.
+        </p>
+      )}
+
+      {/* Status message — matches ToolPageTemplate exactly */}
+      {statusMessage && (
+        <p className={`mt-6 text-[0.95rem] ${
+          statusType === "success"
+            ? "text-green-600"
+            : statusType === "error"
+            ? "text-red-500"
+            : "text-[#4b5563]"
+        }`}>
+          {statusMessage}
+        </p>
+      )}
     </div>
   );
 }
 
-const styles = {
-  page: {
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "flex-start",
-    justifyContent: "center",
-    padding: "40px 16px",
-    backgroundColor: "#f8f9fb",
-    fontFamily: "'Segoe UI', system-ui, sans-serif",
-  },
-  card: {
-    background: "#ffffff",
-    borderRadius: 16,
-    boxShadow: "0 2px 16px rgba(0,0,0,0.08)",
-    padding: "32px",
-    width: "100%",
-    maxWidth: 560,
-    display: "flex",
-    flexDirection: "column",
-    gap: 20,
-  },
-  header: {
-    display: "flex",
-    alignItems: "center",
-    gap: 14,
-  },
-  headerIcon: {
-    width: 36,
-    height: 36,
-    color: "#e53935",
-    flexShrink: 0,
-  },
-  title: {
-    margin: 0,
-    fontSize: 22,
-    fontWeight: 700,
-    color: "#1a1a2e",
-  },
-  subtitle: {
-    margin: "2px 0 0",
-    fontSize: 13,
-    color: "#666",
-  },
-  dropZone: {
-    border: "2px dashed #d0d5dd",
-    borderRadius: 12,
-    padding: "36px 24px",
-    textAlign: "center",
-    cursor: "pointer",
-    transition: "border-color 0.2s, background 0.2s",
-    background: "#fafbfc",
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    gap: 6,
-  },
-  dropZoneActive: {
-    borderColor: "#e53935",
-    background: "#fff5f5",
-  },
-  uploadIcon: {
-    width: 40,
-    height: 40,
-    color: "#e53935",
-    marginBottom: 4,
-  },
-  dropText: {
-    margin: 0,
-    fontSize: 16,
-    fontWeight: 600,
-    color: "#1a1a2e",
-  },
-  dropSub: {
-    margin: 0,
-    fontSize: 13,
-    color: "#888",
-  },
-  badge: {
-    marginTop: 8,
-    fontSize: 11,
-    background: "#f0f0f0",
-    color: "#555",
-    borderRadius: 20,
-    padding: "3px 10px",
-    fontWeight: 500,
-  },
-  errorBox: {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    background: "#fff5f5",
-    border: "1px solid #fca5a5",
-    borderRadius: 8,
-    padding: "10px 14px",
-    fontSize: 13,
-    color: "#b91c1c",
-  },
-  errorIcon: {
-    width: 16,
-    height: 16,
-    flexShrink: 0,
-  },
-  fileSection: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 8,
-  },
-  fileSectionHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  fileCount: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: "#444",
-  },
-  clearBtn: {
-    background: "none",
-    border: "none",
-    color: "#e53935",
-    fontSize: 12,
-    cursor: "pointer",
-    fontWeight: 500,
-    padding: "2px 6px",
-  },
-  fileList: {
-    listStyle: "none",
-    margin: 0,
-    padding: 0,
-    display: "flex",
-    flexDirection: "column",
-    gap: 6,
-  },
-  fileItem: {
-    display: "flex",
-    alignItems: "center",
-    gap: 10,
-    background: "#f8f9fb",
-    borderRadius: 8,
-    padding: "8px 12px",
-    border: "1px solid #eee",
-  },
-  fileOrder: {
-    width: 22,
-    height: 22,
-    borderRadius: "50%",
-    background: "#e53935",
-    color: "#fff",
-    fontSize: 11,
-    fontWeight: 700,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  fileIcon: {
-    width: 16,
-    height: 16,
-    color: "#e53935",
-    flexShrink: 0,
-  },
-  fileName: {
-    flex: 1,
-    fontSize: 13,
-    color: "#333",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-  },
-  fileSize: {
-    fontSize: 11,
-    color: "#888",
-    flexShrink: 0,
-  },
-  fileActions: {
-    display: "flex",
-    gap: 4,
-    flexShrink: 0,
-  },
-  arrowBtn: {
-    background: "none",
-    border: "1px solid #ddd",
-    borderRadius: 4,
-    cursor: "pointer",
-    fontSize: 10,
-    width: 22,
-    height: 22,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#555",
-    padding: 0,
-  },
-  removeBtn: {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    fontSize: 13,
-    color: "#aaa",
-    width: 22,
-    height: 22,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 0,
-    borderRadius: 4,
-  },
-  mergeBtn: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    background: "#e53935",
-    color: "#fff",
-    border: "none",
-    borderRadius: 10,
-    padding: "13px 24px",
-    fontSize: 15,
-    fontWeight: 600,
-    cursor: "pointer",
-    transition: "background 0.2s, opacity 0.2s",
-  },
-  mergeBtnDisabled: {
-    background: "#ccc",
-    cursor: "not-allowed",
-  },
-  countPill: {
-    background: "rgba(255,255,255,0.3)",
-    borderRadius: 20,
-    padding: "1px 7px",
-    fontSize: 12,
-    fontWeight: 700,
-  },
-  spinner: {
-    width: 16,
-    height: 16,
-    border: "2px solid rgba(255,255,255,0.3)",
-    borderTopColor: "#fff",
-    borderRadius: "50%",
-    display: "inline-block",
-    animation: "spin 0.8s linear infinite",
-  },
-  hint: {
-    margin: 0,
-    textAlign: "center",
-    fontSize: 12,
-    color: "#e53935",
-  },
-};
+export default MergePdf;

@@ -13,6 +13,7 @@ import {
   PenTool,
   Expand,
   Palette,
+  Droplets, 
 } from "lucide-react";
 
 const tools = [
@@ -99,6 +100,24 @@ const tools = [
     iconGradient: "from-blue-500 to-indigo-500",
   },
   {
+    id: "image-ocr",
+    name: "Image OCR",
+    icon: <FileText />,
+    description: "Extract editable text from images using OCR.",
+    path: "/image-ocr",
+    gradient: "from-sky-500/10 to-cyan-500/10",
+    iconGradient: "from-sky-500 to-cyan-500",
+  },
+  {
+  id: "image-watermark",
+  name: "Image Watermark",
+  icon: <Droplets />,
+  description: "Add text or image watermarks to protect your photos with custom positioning and opacity.",
+  path: "/image-watermark",
+  gradient: "from-cyan-500/10 to-teal-500/10",
+  iconGradient: "from-cyan-500 to-teal-500",
+  },
+  {
     id: "image-to-grayscale",
     name: "Image to Grayscale",
     icon: <Palette />,
@@ -169,6 +188,15 @@ const tools = [
     path: "/image-to-svg",
     gradient: "from-emerald-500/10 to-blue-500/10",
     iconGradient: "from-emerald-500 to-blue-500",
+  },
+  {
+    id: "docx-to-pdf",
+    name: "DOCX to PDF",
+    icon: <FileText />,
+    description: "Convert .docx files to PDF using the server",
+    path: "/docx-to-pdf",
+    gradient: "from-sky-500/10 to-indigo-500/10",
+    iconGradient: "from-sky-500 to-indigo-500",
   },
 ];
 

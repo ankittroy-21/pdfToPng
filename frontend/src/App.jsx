@@ -13,8 +13,11 @@ import LandingPage from "./pages/LandingPage";
 import ImagePdf from "./pages/ImagePdf";
 import PdfPng from "./pages/PdfPng";
 import PdfDocx from "./pages/PdfDocx";
+import DocxPdf from "./pages/DocxPdf";
 import ImageWebp from "./pages/ImageWbp";
 import ImageJpg from "./pages/ImageJpg";
+import ImageOCR from "./pages/ImageOCR";
+import ImageWatermark from "./pages/ImageWatermark";
 import RemoveBg from "./pages/RemoveBg";
 import RotateFlip from "./pages/RotateFlip";
 import ImageCompress from "./pages/ImageCompress";
@@ -40,6 +43,7 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/pdf-to-png" element={<PdfPng />} />
           <Route path="/pdf-to-word" element={<PdfDocx />} />
+          <Route path="/docx-to-pdf" element={<DocxPdf />} />
           <Route path="/image-to-pdf" element={<ImagePdf />} />
           <Route path="/pdf-merge" element={<PdfMerge />} />
           <Route path="/pdf-split" element={<PdfSplit />} />
@@ -47,6 +51,8 @@ function App() {
           
           <Route path="/image-to-webp" element={<ImageWebp />} />
           <Route path="/image-to-jpg" element={<ImageJpg />} />
+          <Route path="/image-ocr" element={<ImageOCR />} />
+          <Route path="/image-watermark" element={<ImageWatermark />} />
           <Route path="/image-to-svg" element={<ImageToSVG />} />
           <Route path="/image-to-grayscale" element={<ImageGrayScale />} />
           <Route path="/remove-bg" element={<RemoveBg />} />

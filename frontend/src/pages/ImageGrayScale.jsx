@@ -1,92 +1,55 @@
-import React, { useState } from "react";
+import React, { useCallback } from "react";
+import ToolPageTemplate from "../components/ToolPageTemplate";
 
 const ImageGrayScale = () => {
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [isConverting, setIsConverting] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    setSelectedFile(file || null);
-    setError("");
-  };
-
-  const handleConvert = async () => {
-    if (!selectedFile) {
-      setError("Please select an image first.");
-      return;
+  const validateFile = useCallback((selectedFile) => {
+    if (selectedFile && selectedFile.type.startsWith("image/")) {
+      return { isValid: true, message: `Image selected: ${selectedFile.name}` };
     }
-
-    setIsConverting(true);
-    setError("");
-
-    try {
-      const formData = new FormData();
-      formData.append("image", selectedFile);
-
-      const response = await fetch("http://127.0.0.1:5000/convertGrayscale", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to convert image to grayscale.");
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const originalName = selectedFile.name.replace(/\.[^/.]+$/, "");
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${originalName}_grayscale.png`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      setError(err.message || "Something went wrong.");
-    } finally {
-      setIsConverting(false);
-    }
-  };
+    return { isValid: false, message: "Please select an image file" };
+  }, []);
 
   return (
-    <div className="w-full max-w-2xl bg-white shadow-lg rounded-xl p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-2">
-        Image to Grayscale
-      </h1>
-      <p className="text-gray-600 mb-6">
-        Upload an image and convert it to grayscale.
-      </p>
-
-      <div className="space-y-4">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg p-3"
-        />
-
-        {selectedFile && (
-          <p className="text-sm text-gray-600">
-            Selected file: <span className="font-medium">{selectedFile.name}</span>
-          </p>
-        )}
-
-        {error && (
-          <p className="text-sm text-red-600">{error}</p>
-        )}
-
-        <button
-          onClick={handleConvert}
-          disabled={isConverting || !selectedFile}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-5 py-3 rounded-lg transition-colors"
+    <ToolPageTemplate
+      title="Image to Grayscale"
+      description="Upload an image and convert it to grayscale."
+      accept="image/*"
+      validateFile={validateFile}
+      apiEndpoint="/convertGrayscale"
+      fileFieldName="image"
+      getDownloadFilename={(fileName) => {
+        const originalName = fileName.replace(/\.[^/.]+$/, "");
+        return `${originalName}_grayscale.png`;
+      }}
+      submitButtonText="Convert to Grayscale"
+      loadingButtonText="Converting..."
+      onSuccessMessage="Image converted successfully!"
+      defaultIcon={
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          {isConverting ? "Converting..." : "Convert to Grayscale"}
-        </button>
-      </div>
-    </div>
+          <path
+            d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M12 22V2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+            fill="currentColor"
+            fillOpacity="0.5"
+          />
+        </svg>
+      }
+      defaultText="Choose image file or drag & drop here"
+      supportText="Supports PNG, JPG, JPEG, and more"
+      inputId="grayscale-input"
+    />
   );
 };
 

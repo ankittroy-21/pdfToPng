@@ -274,7 +274,72 @@ def _extract_metadata(img, file_bytes, filename):
 
     return metadata
 
+def _analyze_metadata_security(metadata: dict):
+    sensitive_fields = {
+        "GPS Latitude": "GPS location detected",
+        "GPS Longitude": "GPS location detected",
+        "GPS Maps Link": "GPS location detected",
+        "Camera Make": "Device information detected",
+        "Camera Model": "Device information detected",
+        "Software": "Software/device metadata detected",
+        "Artist": "Author information detected",
+        "Copyright": "Ownership information detected",
+        "Date Taken": "Timestamp detected",
+        "Date Modified": "Timestamp detected",
+        "Date Digitized": "Timestamp detected",
+        "User Comment": "User-generated hidden data detected",
+    }
 
+    found = []
+    risk_score = 0
+
+    for key in metadata.keys():
+        if key in sensitive_fields:
+            found.append({
+                "field": key,
+                "description": sensitive_fields[key],
+                "value": metadata[key]
+            })
+
+            # scoring rules
+            if "GPS" in key:
+                risk_score += 40
+            elif key in ("Artist", "Copyright"):
+                risk_score += 25
+            elif "Date" in key:
+                risk_score += 15
+            else:
+                risk_score += 10
+
+    # cap score
+    risk_score = min(risk_score, 100)
+
+    # risk level
+    if risk_score >= 70:
+        risk_level = "HIGH"
+    elif risk_score >= 40:
+        risk_level = "MEDIUM"
+    else:
+        risk_level = "LOW"
+
+    # suggestions
+    actions = []
+
+    if any("GPS" in f["field"] for f in found):
+        actions.append("Remove GPS metadata")
+    if any(f["field"] == "Artist" for f in found):
+        actions.append("Remove author information")
+    if any("Date" in f["field"] for f in found):
+        actions.append("Strip timestamps")
+    if found:
+        actions.append("Strip all metadata (recommended)")
+
+    return {
+        "risk_score": risk_score,
+        "risk_level": risk_level,
+        "sensitive_fields": found,
+        "recommended_actions": actions
+    }
 # ── routes ────────────────────────────────────────────────────────────────────
 
 @metadata_bp.route("/view-metadata", methods=["POST"])
@@ -282,7 +347,12 @@ def _extract_metadata(img, file_bytes, filename):
 def view_metadata(img, filename, file_bytes):
     img.load()
     metadata = _extract_metadata(img, file_bytes, filename)
-    return jsonify({"metadata": metadata})
+    security_report = _analyze_metadata_security(metadata)
+
+    return jsonify({
+        "metadata": metadata,
+        "security_report": security_report
+    })
 
 
 @metadata_bp.route("/strip-metadata", methods=["POST"])

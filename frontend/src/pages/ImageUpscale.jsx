@@ -58,6 +58,33 @@ function ImageUpscale() {
       onSuccessMessage="Image upscaled successfully!"
       extraFields={extraFields}
       maxWidthClass="max-w-[600px]"
+      defaultIcon={
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M3 3v18h18"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M7 14l4-4 4 4 6-6"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      }
+      defaultText="Choose image file or drag & drop here"
+      supportText="Supports PNG, JPG, JPEG, and more"
+      inputId="upscale-input"
     />
   );
 }

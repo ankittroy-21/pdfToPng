@@ -1,98 +1,110 @@
-import React, { useState } from "react";
+import { useCallback } from "react";
 import { PDFDocument } from "pdf-lib";
+import ToolPageTemplate from "../components/ToolPageTemplate";
 
 function ImagePdf() {
-  const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const validateFile = useCallback((selectedFile) => {
+    if (selectedFile && selectedFile.type.startsWith("image/")) {
+      return {
+        isValid: true,
+        message: `Image selected: ${selectedFile.name}`,
+      };
+    }
+    return {
+      isValid: false,
+      message: "Error: Please select an image file.",
+    };
+  }, []);
 
-  const handleChange = (e) => {
-    setFiles(Array.from(e.target.files));
-  };
+  const createPdf = async ({ file, setLoading, setStatusMessage, setStatusType }) => {
+    if (!file) return;
 
-  const createPdf = async () => {
-    if (!files.length) return;
+    setLoading(true);
+    setStatusMessage("Creating PDF...");
+    setStatusType("info");
 
     try {
-      setLoading(true);
-
       const pdfDoc = await PDFDocument.create();
 
-      for (const file of files) {
-        const bytes = await file.arrayBuffer();
-
-        let image;
-        if (file.type === "image/png") {
-          image = await pdfDoc.embedPng(bytes);
-        } else {
-          image = await pdfDoc.embedJpg(bytes);
-        }
-
-        const { width, height } = image.scale(1);
-
-        const page = pdfDoc.addPage([width, height]);
-
-        page.drawImage(image, {
-          x: 0,
-          y: 0,
-          width,
-          height,
-        });
+      const bytes = await file.arrayBuffer();
+      let image;
+      if (file.type === "image/png") {
+        image = await pdfDoc.embedPng(bytes);
+      } else {
+        image = await pdfDoc.embedJpg(bytes);
       }
 
+      const page = pdfDoc.addPage([image.width, image.height]);
+      page.drawImage(image, { x: 0, y: 0, width: image.width, height: image.height });
+
       const pdfBytes = await pdfDoc.save();
-
-      const blob = new Blob([pdfBytes], {
-        type: "application/pdf",
-      });
-
+      const blob = new Blob([pdfBytes], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "images.pdf";
+      a.download = "converted-image.pdf";
+      document.body.appendChild(a);
       a.click();
-
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
+
+      setStatusMessage("Success! Your PDF has been created.");
+      setStatusType("success");
     } catch (err) {
       console.error(err);
-      alert("Failed to create PDF");
+      setStatusMessage("Error: Failed to create PDF. See console for details.");
+      setStatusType("error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-[600px] mx-auto p-10 bg-white rounded-2xl shadow-lg text-center">
-      <h1 className="text-4xl font-bold mb-8 text-[#1a1a2e]">
-        Image to PDF
-      </h1>
-
-      <input
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={handleChange}
-        className="mb-6"
-      />
-
-      {files.length > 0 && (
-        <div className="mb-6 text-left">
-          {files.map((file, index) => (
-            <p key={index} className="text-sm text-gray-700">
-              {file.name}
-            </p>
-          ))}
-        </div>
-      )}
-
-      <button
-        onClick={createPdf}
-        disabled={!files.length || loading}
-        className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
-      >
-        {loading ? "Creating PDF..." : "Convert to PDF"}
-      </button>
-    </div>
+    <ToolPageTemplate
+      title="Image to PDF"
+      description="Convert an image into a PDF file, right in your browser."
+      accept="image/*"
+      validateFile={validateFile}
+      onSubmit={createPdf}
+      submitButtonText="Convert to PDF"
+      loadingButtonText="Creating..."
+      onSuccessMessage="Success! Your PDF has been created."
+      defaultIcon={
+        <svg
+          width="64"
+          height="64"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M4 16L8.58579 11.4142C9.36683 10.6332 10.6332 10.6332 11.4142 11.4142L16 16M14 14L15.5858 12.4142C16.3668 11.6332 17.6332 11.6332 18.4142 12.4142L20 14"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M14 8H14.01"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M4 6C4 4.89543 4.89543 4 6 4H18C19.1046 4 20 4.89543 20 6V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V6Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      }
+      defaultText="Choose image file or drag & drop here"
+      supportText="Supports PNG, JPG, GIF, and more"
+      inputId="image-pdf-input"
+    />
   );
 }
 

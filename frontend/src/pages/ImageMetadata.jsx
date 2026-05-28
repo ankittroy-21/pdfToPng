@@ -4,8 +4,9 @@ import { Info, Copy, Check, Download } from "lucide-react";
 
 export default function ImageMetadata() {
   const [metadata, setMetadata] = useState(null);
+  const [securityReport, setSecurityReport] = useState(null);
   const [copiedKey, setCopiedKey] = useState(null);
-
+  
   const validateFile = useCallback((selectedFile) => {
     if (selectedFile && selectedFile.type.startsWith("image/")) {
       return {
@@ -23,6 +24,7 @@ export default function ImageMetadata() {
 
   const handleClear = () => {
     setMetadata(null);
+    setSecurityReport(null);
     setCopiedKey(null);
   };
 
@@ -45,6 +47,7 @@ export default function ImageMetadata() {
         return;
       }
       setMetadata(data.metadata);
+      setSecurityReport(data.security_report);
       setStatusMessage("Success! Metadata loaded.");
       setStatusType("success");
     } catch (err) {
@@ -103,7 +106,54 @@ export default function ImageMetadata() {
       setTimeout(() => setStatusMessage(""), 5000);
     }
   };
+  const handleCleanAndDownload = async (file, setLoading, setStatusMessage, setStatusType) => {
+  if (!file) return;
 
+  setLoading(true);
+  setStatusMessage("Cleaning metadata...");
+
+  const formData = new FormData();
+  formData.append("image", file);
+
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/strip-metadata`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) throw new Error("Failed to clean image");
+
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+
+    const baseName = file.name.replace(/\.[^.]+$/, "");
+    const extension = file.name.includes(".") ? file.name.split(".").pop() : "png";
+
+    a.download = `${baseName}_privacy_cleaned.${extension}`;
+
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+
+    setStatusMessage("Privacy cleaned successfully!");
+    setStatusType("success");
+
+    // optional UX reset
+    setMetadata(null);
+    setSecurityReport(null);
+  } catch (err) {
+    setStatusMessage(`Error: ${err.message}`);
+    setStatusType("error");
+  } finally {
+    setLoading(false);
+    setTimeout(() => setStatusMessage(""), 4000);
+  }
+};
   const copyToClipboard = (key, value) => {
     navigator.clipboard.writeText(`${key}: ${value}`);
     setCopiedKey(key);
@@ -127,8 +177,75 @@ export default function ImageMetadata() {
             <Download size={16} />
             Strip Metadata & Download
           </button>
+           <button
+    onClick={() =>
+      handleCleanAndDownload(file, setLoading, setStatusMessage, setStatusType)
+    }
+    disabled={loading}
+    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg text-sm font-semibold shadow-sm hover:from-green-600 hover:to-emerald-700 transition-all cursor-pointer disabled:opacity-50"
+  >
+    <Download size={16} />
+    One-Click Clean
+  </button>
         </div>
+{securityReport && (
+  <div className="mb-6 p-4 rounded-xl border bg-yellow-50 border-yellow-200">
+    <div className="flex items-center justify-between">
+      <h3 className="font-semibold text-yellow-800">
+      <span
+  className={`px-3 py-1 rounded-full text-xs font-bold ${
+    securityReport.risk_level === "HIGH"
+      ? "bg-red-100 text-red-700"
+      : securityReport.risk_level === "MEDIUM"
+      ? "bg-yellow-100 text-yellow-700"
+      : "bg-green-100 text-green-700"
+  }`}
+>
+  Privacy Risk: {securityReport.risk_level}
+</span>
+      </h3>
+      <div className="flex flex-col gap-2">
+  <span className="text-sm font-bold text-yellow-700">
+    Score: {securityReport.risk_score}/100
+  </span>
 
+  {/* Risk Progress Bar */}
+  <div className="w-40 h-2 bg-gray-200 rounded-full overflow-hidden">
+    <div
+      className={`h-full transition-all duration-500 ${
+        securityReport.risk_level === "HIGH"
+          ? "bg-red-500"
+          : securityReport.risk_level === "MEDIUM"
+          ? "bg-yellow-500"
+          : "bg-green-500"
+      }`}
+      style={{ width: `${securityReport.risk_score}%` }}
+    />
+  </div>
+</div>
+    </div>
+
+    <div className="mt-3 text-sm text-yellow-900">
+      <p className="font-medium mb-2">Sensitive Data Detected:</p>
+      <ul className="list-disc ml-5 space-y-1">
+        {securityReport.sensitive_fields?.map((item, idx) => (
+          <li key={idx}>
+            <span className="font-semibold">{item.field}</span> — {item.description}
+          </li>
+        ))}
+      </ul>
+    </div>
+
+    <div className="mt-3 text-sm text-yellow-900">
+      <p className="font-medium mb-2">Recommended Actions:</p>
+      <ul className="list-disc ml-5 space-y-1">
+        {securityReport.recommended_actions?.map((a, i) => (
+          <li key={i}>{a}</li>
+        ))}
+      </ul>
+    </div>
+  </div>
+)}
         {keys.length === 0 ? (
           <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl text-center text-sm text-gray-500">
             No metadata found in this image.

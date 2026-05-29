@@ -1,6 +1,7 @@
-import React, { useState, useCallback } from "react";
-import { useFileUpload } from "../hooks/useFileUpload";
-import FileUploadArea from "./FileUploadArea";
+import React, { useState, useCallback, lazy, Suspense } from "react";import { useFileUpload } from "../hooks/useFileUpload";
+
+
+const FileUploadArea = lazy(() => import("./FileUploadArea"));
 
 const ToolPageTemplate = ({
   title,
@@ -163,6 +164,7 @@ const ToolPageTemplate = ({
       {description && <p className="text-gray-800 mb-8">{description}</p>}
 
       <form onSubmit={handleSubmit} className="w-full flex flex-col items-center">
+        <Suspense fallback={<div>Loading upload...</div>}>
         <FileUploadArea
           file={file}
           previewUrl={previewUrl}
@@ -182,6 +184,7 @@ const ToolPageTemplate = ({
           defaultText={defaultText}
           supportText={supportText}
         />
+        </Suspense>
 
         {extraFields && (typeof extraFields === "function" ? extraFields(context) : extraFields)}
 

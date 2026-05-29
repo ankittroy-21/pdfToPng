@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from "react";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf";
+
 import JSZip from "jszip";
-import pdfWorker from "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url";
+
 import ToolPageTemplate from "../components/ToolPageTemplate";
 
 // Set worker source for PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+
 
 const PdfPng = () => {
   const [scale, setScale] = useState(2.0); // Default scale (2x)
@@ -18,7 +18,17 @@ const PdfPng = () => {
     if (selectedFile && selectedFile.type === "application/pdf") {
       try {
         const arrayBuffer = await selectedFile.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pdfjsLib = await import("pdfjs-dist");
+
+const pdfWorker = await import(
+  "pdfjs-dist/build/pdf.worker.min.mjs?url"
+);
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker.default;
+
+const pdf = await pdfjsLib.getDocument({
+  data: arrayBuffer,
+}).promise;
         setNumPages(pdf.numPages);
       } catch (err) {
         console.error("Error loading PDF info:", err);
@@ -46,6 +56,13 @@ const PdfPng = () => {
   const handleCustomSubmit = async ({ file, setStatusMessage, setLoading, setStatusType }) => {
     setStatusMessage("Processing PDF... This may take a while for large files.");
     try {
+      const pdfjsLib = await import("pdfjs-dist/legacy/build/pdf");
+
+const pdfWorker = await import(
+  "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url"
+);
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker.default;
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       const totalPages = pdf.numPages;

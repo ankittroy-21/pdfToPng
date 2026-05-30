@@ -12,6 +12,7 @@ This project is a comprehensive full‑stack web app for doing simple, local fil
 - Rotate or flip PDF pages
 - Add watermarks to PDFs
 - Sign PDFs
+- Convert Markdown files to HTML with optional theme styling
 
 **Image Tools:**
 
@@ -76,7 +77,8 @@ pdfToPng/
 │   │   ├── split_pdf.py
 │   │   ├── pdf_to_docx.py
 │   │   ├── docx_to_pdf.py
-│   │   └── watermark.py
+│   │   ├── watermark.py
+│   │   └── markdown.py
 │   └── utils/
 │       ├── __init__.py
 │       ├── helpers.py
@@ -129,6 +131,7 @@ pdfToPng/
 │       │   ├── PdfRotateFlip.jsx
 │       │   ├── PDFWatermark.jsx
 │       │   ├── PdfSign.jsx
+│       │   ├── MdToHtml.jsx
 │       │   ├── ImageWbp.jsx
 │       │   ├── ImageJpg.jsx
 │       │   ├── ImagePdf.jsx

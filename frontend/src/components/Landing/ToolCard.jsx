@@ -1,7 +1,193 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Image } from "lucide-react";
 import "./ToolCard.css";
+
+const pdfWatermarkAnimation = (
+  <div className="tc-scene tc-pdf-watermark-scene flex items-center justify-center">
+    <div className="relative w-[58px] h-[50px]">
+      <div className="absolute left-1/2 top-1/2 w-[34px] h-[42px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] bg-[#FFF8F5] border border-[#F0997B] overflow-hidden">
+        <div className="absolute top-[8px] left-[5px] right-[5px] h-[2px] rounded-full bg-[#D85A30] opacity-60" />
+        <div className="absolute top-[14px] left-[5px] right-[10px] h-[2px] rounded-full bg-[#D85A30] opacity-35" />
+
+        <div className="absolute inset-0 flex items-center justify-center rotate-[-25deg] opacity-0 scale-150 group-hover:opacity-25 group-hover:scale-100 transition-all duration-500">
+          <span className="text-[10px] font-black tracking-wider text-[#D85A30]">
+            CONFIDENTIAL
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const imageWatermarkAnimation = (
+  <div className="tc-scene tc-image-watermark-scene flex items-center justify-center">
+    <div className="relative w-[58px] h-[50px]">
+      <div className="absolute left-1/2 top-1/2 w-[36px] h-[36px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] bg-[#FAFCFF] border border-[#85B7EB] overflow-hidden">
+        <div className="absolute top-[6px] right-[6px] w-[8px] h-[8px] rounded-full bg-[#EF9F27]" />
+
+        <svg viewBox="0 0 36 16" width="36" height="16" className="absolute bottom-0">
+          <polygon points="0,16 8,6 15,10 24,3 36,16" fill="#5DCAA5" opacity="0.85" />
+        </svg>
+
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 translate-y-[8px] group-hover:opacity-70 group-hover:translate-y-0 transition-all duration-500">
+          <span className="text-[8px] font-bold text-white bg-[#1D9E75] px-2 py-[1px] rounded">
+            ©Brand
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const imageOcrAnimation = (
+  <div className="tc-scene tc-image-ocr-scene flex items-center justify-center">
+    <div className="relative w-[60px] h-[48px]">
+      <div className="absolute inset-0 rounded-[6px] bg-[#E6F1FB] border border-[#85B7EB]" />
+
+      <div className="absolute inset-[8px] rounded-[4px] bg-white border border-[#85B7EB]">
+        <div className="absolute top-[5px] right-[5px] w-[8px] h-[8px] rounded-full bg-[#EF9F27]" />
+        <div className="absolute left-[6px] right-[18px] top-[10px] h-[2px] rounded-full bg-[#8FB9E8] opacity-70" />
+        <div className="absolute left-[6px] right-[22px] top-[15px] h-[2px] rounded-full bg-[#8FB9E8] opacity-50" />
+        <div className="absolute left-[6px] right-[14px] top-[20px] h-[2px] rounded-full bg-[#8FB9E8] opacity-35" />
+      </div>
+
+      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 scale-75 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+        <div className="bg-white border border-[#5DCAA5] rounded px-1 py-[1px] text-[7px] font-bold text-[#1D9E75]">
+          OCR
+        </div>
+      </div>
+
+      <div className="absolute -top-1 -right-1 opacity-0 scale-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300">
+        <div className="w-4 h-4 rounded-full bg-[#1D9E75] text-white text-[8px] flex items-center justify-center font-bold">
+          ✓
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
+const pdfSplitAnimation = (
+  <div className="tc-scene tc-pdf-split-scene flex items-center justify-center">
+    <div className="relative w-[70px] h-[54px]">
+      <div className="absolute left-1/2 top-1/2 w-[30px] h-[40px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] bg-[#FFF8F5] border border-[#F0997B] shadow-sm group-hover:opacity-0 transition-all duration-300">
+        <div className="absolute top-[8px] left-[5px] right-[5px] h-[2px] rounded-full bg-[#D85A30] opacity-70" />
+        <div className="absolute top-[14px] left-[5px] right-[10px] h-[2px] rounded-full bg-[#D85A30] opacity-45" />
+        <div className="absolute top-[20px] left-[5px] right-[7px] h-[2px] rounded-full bg-[#D85A30] opacity-30" />
+        <span className="absolute bottom-[6px] left-1/2 -translate-x-1/2 text-[7px] font-bold text-[#993C1D]">
+          PDF
+        </span>
+      </div>
+
+      <div className="absolute left-1/2 top-1/2 w-[24px] h-[34px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] bg-[#FFF8F5] border border-[#F0997B] shadow-sm group-hover:-translate-x-[30px] transition-all duration-500">
+        <span className="absolute inset-0 flex items-center justify-center text-[6px] font-bold text-[#993C1D]">
+          PDF
+        </span>
+      </div>
+
+      <div className="absolute left-1/2 top-1/2 w-[24px] h-[34px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] bg-[#FFF8F5] border border-[#F0997B] shadow-sm group-hover:translate-x-[6px] transition-all duration-500">
+        <span className="absolute inset-0 flex items-center justify-center text-[6px] font-bold text-[#993C1D]">
+          PDF
+        </span>
+      </div>
+    </div>
+  </div>
+);
+
+const docToPdfAnimation = (
+  <div className="tc-scene tc-docx-pdf-scene flex items-center justify-center">
+    <div className="relative w-[70px] h-[52px]">
+
+      {/* DOCX */}
+      <div className="absolute left-1/2 top-1/2 w-[28px] h-[36px] -translate-x-1/2 -translate-y-1/2 rounded-[4px] border border-[#4F8EF7] bg-[#F5F9FF] flex items-center justify-center text-[7px] font-bold text-[#2563EB] transition-all duration-500 group-hover:-translate-x-[22px] group-hover:opacity-0 group-hover:scale-75">
+        DOCX
+      </div>
+
+      {/* PDF */}
+      <div className="absolute left-1/2 top-1/2 w-[28px] h-[36px] -translate-y-1/2 translate-x-[30px] rounded-[4px] border border-[#F0997B] bg-[#FFF8F5] flex items-center justify-center text-[7px] font-bold text-[#D85A30] opacity-0 scale-75 transition-all duration-500 group-hover:translate-x-[-14px] group-hover:opacity-100 group-hover:scale-100">
+        PDF
+      </div>
+
+      {/* Check */}
+      <div className="absolute right-[8px] top-[6px] w-[14px] h-[14px] rounded-full bg-[#1D9E75] text-white text-[8px] flex items-center justify-center font-bold opacity-0 scale-0 transition-all duration-300 delay-300 group-hover:opacity-100 group-hover:scale-100">
+        ✓
+      </div>
+
+    </div>
+  </div>
+);
+
+const imageToSvgAnimation = (
+  <div className="tc-scene tc-image-svg-scene flex items-center justify-center">
+    <div className="relative w-[40px] h-[40px]">
+
+      {/* IMAGE */}
+      <div
+        className="
+          absolute inset-0
+          rounded-[6px]
+          bg-[#E6F1FB]
+          border border-[#85B7EB]
+          overflow-hidden
+          transition-all duration-500
+          group-hover:opacity-0
+          group-hover:scale-75
+          group-hover:rotate-6
+        "
+      >
+        <div className="absolute top-[6px] right-[6px] w-[7px] h-[7px] rounded-full bg-[#EF9F27]" />
+
+        <svg
+          viewBox="0 0 40 16"
+          width="40"
+          height="16"
+          className="absolute bottom-0"
+        >
+          <polygon
+            points="0,16 10,4 18,9 28,2 40,16"
+            fill="#5DCAA5"
+            opacity="0.85"
+          />
+        </svg>
+      </div>
+
+      {/* SVG */}
+      <div
+        className="
+          absolute inset-0
+          rounded-[6px]
+          bg-white
+          border border-[#378ADD]
+          flex items-center justify-center
+          opacity-0
+          scale-125
+          transition-all duration-500
+          group-hover:opacity-100
+          group-hover:scale-100
+        "
+      >
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <polygon
+            points="5,17 8,7 16,9 19,15"
+            fill="none"
+            stroke="#378ADD"
+            strokeWidth="1.6"
+          />
+
+          <circle cx="5" cy="17" r="1.8" fill="#378ADD" />
+          <circle cx="8" cy="7" r="1.8" fill="#378ADD" />
+          <circle cx="16" cy="9" r="1.8" fill="#378ADD" />
+          <circle cx="19" cy="15" r="1.8" fill="#378ADD" />
+        </svg>
+
+        <span className="absolute top-[3px] text-[6px] font-bold text-[#378ADD]">
+          SVG
+        </span>
+      </div>
+
+    </div>
+  </div>
+);
 
 const toolAnimations = {
   "pdf-to-png": (
@@ -227,6 +413,36 @@ const toolAnimations = {
       </div>
     </div>
   ),
+"pdf-rotate-flip": (
+  <div className="tc-scene flex items-center justify-center group">
+    <div className="relative w-[70px] h-[54px] flex items-center justify-center">
+
+      <div
+        className="
+          relative w-[24px] h-[34px]
+          rounded-[4px]
+          bg-[#FFF8F5]
+          border border-[#F0997B]
+          shadow-sm
+          transition-all duration-500 ease-out
+          group-hover:scale-110
+          group-hover:scale-x-[-1]
+        "
+      >
+        <div className="absolute inset-0 group-hover:scale-x-[-1] transition-all duration-500">
+          <div className="absolute top-[7px] left-[4px] right-[4px] h-[1.5px] rounded-full bg-[#D85A30] opacity-70" />
+          <div className="absolute top-[13px] left-[4px] right-[8px] h-[1.5px] rounded-full bg-[#D85A30] opacity-45" />
+          <div className="absolute top-[19px] left-[4px] right-[6px] h-[1.5px] rounded-full bg-[#D85A30] opacity-30" />
+
+          <span className="absolute bottom-[5px] left-1/2 -translate-x-1/2 text-[6px] font-bold text-[#D85A30]">
+            PDF
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+),
 
   "rotate-flip": (
     <div className="tc-scene tc-rotate-scene">
@@ -322,6 +538,28 @@ const toolAnimations = {
           <div className="tc-b64-line h-[2px] rounded-[1px] bg-[#5DCAA5] opacity-70 w-[55%]" />
           <div className="tc-b64-cursor w-[2px] h-[8px] bg-[#5DCAA5] rounded-[1px] opacity-0 absolute bottom-[6px] right-[6px]" />
         </div>
+      </div>
+    </div>
+  ),
+
+  "image-ocr": imageOcrAnimation,
+
+  "docx-to-pdf": docToPdfAnimation,
+
+  "image-to-svg": imageToSvgAnimation,
+
+  "pdf-split": pdfSplitAnimation,
+
+  "pdf-watermark": pdfWatermarkAnimation,
+
+  "image-watermark": imageWatermarkAnimation,
+  "image-blur": (
+    <div className="tc-scene tc-blur-scene flex items-center justify-center">
+      <div className="tc-blur-image w-[54px] h-[40px] rounded-[8px] bg-[#E6F1FB] border border-[#85B7EB] flex items-center justify-center">
+  "image-blur": (
+    <div className="tc-scene tc-blur-scene flex items-center justify-center">
+      <div className="tc-blur-image w-[54px] h-[40px] rounded-[8px] bg-[#E6F1FB] border border-[#85B7EB] flex items-center justify-center" >
+        <Image />
       </div>
     </div>
   ),

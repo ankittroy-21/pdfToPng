@@ -41,7 +41,8 @@ const Layout = () => {
         {!isLandingPage && (
           <button
             onClick={() => navigate("/")}
-            className="fixed top-4 right-4 z-50 px-5 py-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 font-medium flex items-center gap-2"
+            /* Lowered z-index to z-40 so the Sidebar can overlap it cleanly */
+            className="fixed top-4 right-4 z-40 px-5 py-2 bg-gradient-to-r from-purple-600 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 font-medium flex items-center gap-2"
           >
             <span>Home</span>
           </button>
@@ -54,17 +55,17 @@ const Layout = () => {
                 onClick={toggleMobileMenu}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <Menu className="w-6 h-6" />
+                <Menu className="w-6 h-6 text-slate-700" />
               </button>
 
-      <h1 className="text-lg font-semibold text-blue-700">
-        pdfToPng
-      </h1>
+              <h1 className="text-lg font-bold text-blue-600">
+                pdfToPng
+              </h1>
 
-      <div className="w-10" />
-    </div>
-  </header>
-)}
+              <div className="w-10" />
+            </div>
+          </header>
+        )}
 
         <div className="min-h-full flex justify-center items-center py-8">
           <Outlet />

@@ -11,13 +11,24 @@ const Sidebar = ({ activeTab, isMobileMenuOpen, isMobile, onClose }) => {
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
  
-  // Safely handle missing names or descriptions to prevent toLowerCase crashes
   const filteredTools = tools.filter((tool) => {
-    const query = searchQuery.toLowerCase().trim().replace(/[-_\s]+/g, "");
-    const toolName = (tool.name || "").toLowerCase().replace(/[-_\s]+/g, "");
-    const toolDescription = (tool.description || "").toLowerCase().replace(/[-_\s]+/g, "");
+    const query = searchQuery
+      .toLowerCase()
+      .trim()
+      .replace(/[-_\s]+/g, "");
 
-    return toolName.includes(query) || toolDescription.includes(query);
+    const toolName = tool.name
+      .toLowerCase()
+      .replace(/[-_\s]+/g, "");
+
+    const toolDescription = tool.description
+      .toLowerCase()
+      .replace(/[-_\s]+/g, "");
+
+    return (
+      toolName.includes(query) ||
+      toolDescription.includes(query)
+    );
   });
 
   const menuItems = filteredTools.map((t) => ({
@@ -54,10 +65,12 @@ const Sidebar = ({ activeTab, isMobileMenuOpen, isMobile, onClose }) => {
 
   return (
     <>
+      {/* Mobile overlay backdrop with high z-index */}
       {isMobile && isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-white bg-opacity-50 z-40"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9998]"
           onClick={onClose}
+          aria-label="Close sidebar overlay"
         />
       )}
 
@@ -65,13 +78,13 @@ const Sidebar = ({ activeTab, isMobileMenuOpen, isMobile, onClose }) => {
         className={`
           ${isMobile ? "fixed" : "sticky"} 
           top-0 left-0 h-screen bg-white
-          text-blue-500 transition-all duration-300 ease-in-out z-50
+          text-blue-500 transition-all duration-300 ease-in-out z-[10000]
           ${isMobile && !isMobileMenuOpen ? "-translate-x-full" : "translate-x-0"}
           ${!isMobile && isCollapsed ? "w-20" : "w-80"}
-          flex flex-col shadow-xl
+          flex flex-col shadow-2xl
         `}
       >
-        <div className="p-4 border-b border-slate-700">
+        <div className="p-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
             {(!isCollapsed || isMobile) && (
               <Link

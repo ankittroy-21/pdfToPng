@@ -34,9 +34,29 @@ const Sidebar = ({ activeTab, isMobileMenuOpen, isMobile, onClose }) => {
   const menuItems = filteredTools.map((t) => ({
     id: t.id,
     label: t.name,
-    icon: React.cloneElement(t.icon, { className: "w-5 h-5" }),
+    icon: t.icon, // Pass the raw icon, handle cloning during render
     description: t.description,
+    category: t.category || "Utilities", // Default to an existing category
   }));
+
+  const groupedTools = menuItems.reduce((acc, tool) => {
+    if (!acc[tool.category]) {
+      acc[tool.category] = [];
+    }
+    acc[tool.category].push(tool);
+    return acc;
+  }, {});
+
+  const categoryOrder = [
+    "PDF Tools",
+    "Image Tools",
+    "AI Tools",
+    "Conversion Tools",
+    "Utilities",
+  ];
+
+  // Base the empty state on visible categories, not total items
+  const visibleCategories = categoryOrder.filter((category) => groupedTools[category]);
 
   const handleNavigation = (id) => {
     navigate(`/${id}`);
@@ -66,50 +86,36 @@ const Sidebar = ({ activeTab, isMobileMenuOpen, isMobile, onClose }) => {
       >
         <div className="p-4 border-b border-slate-200">
           <div className="flex items-center justify-between">
-            
-            {isMobile ? (
-              /* MOBILE VIEW: Close button on the left, smaller logo on the right */
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={onClose}
-                  aria-label="Close sidebar"
-                  className="p-2 -ml-2 text-slate-600 hover:bg-slate-100 hover:text-slate-900 rounded-lg transition-colors flex items-center justify-center"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-                <div className="flex items-center gap-1.5 cursor-default select-none">
-                  <FileText className="w-5 h-5 text-blue-500" />
-                  <h1 className="text-base font-bold text-slate-800">pdfToPng</h1>
-                </div>
-              </div>
-            ) : (
-              /* DESKTOP VIEW: Show Logo and Collapse Toggle */
-              <>
-                {!isCollapsed && (
-                  <Link
-                    to="/"
-                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                  >
-                    <FileText className="w-6 h-6 text-blue-500" />
-                    <h1 className="text-xl font-bold text-slate-800">pdfToPng</h1>
-                  </Link>
-                )}
-                <button
-                  onClick={toggleSidebar}
-                  aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                  className={`p-2 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors ${
-                    isCollapsed ? "mx-auto" : ""
-                  }`}
-                >
-                  {isCollapsed ? (
-                    <ChevronRight className="w-5 h-5" />
-                  ) : (
-                    <ChevronLeft className="w-5 h-5" />
-                  )}
-                </button>
-              </>
+            {(!isCollapsed || isMobile) && (
+              <Link
+                to="/"
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
+                <FileText className="w-6 h-6 text-blue-400" />
+                <h1 className="text-xl font-bold">pdfToPng</h1>
+              </Link>
             )}
-
+            <button
+              onClick={isMobile ? onClose : toggleSidebar}
+              aria-label={
+                isMobile
+                  ? "Close sidebar"
+                  : isCollapsed
+                  ? "Expand sidebar"
+                  : "Collapse sidebar"
+              }
+              className={`p-2 hover:bg-slate-100 rounded-lg transition-colors ${
+                isCollapsed && !isMobile ? "mx-auto" : ""
+              }`}
+            >
+              {isMobile ? (
+                <X className="w-5 h-5" />
+              ) : isCollapsed ? (
+                <ChevronRight className="w-5 h-5" />
+              ) : (
+                <ChevronLeft className="w-5 h-5" />
+              )}
+            </button>
           </div>
         </div>
 
@@ -121,37 +127,66 @@ const Sidebar = ({ activeTab, isMobileMenuOpen, isMobile, onClose }) => {
                 placeholder="Search tools..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 text-slate-700 placeholder-slate-400"
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
           )}
- 
-          {menuItems.length > 0 ? (
-            <ul className="space-y-2">
-              {menuItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => handleNavigation(item.id)}
-                    className={`
-                      w-full flex ${isCollapsed ? "flex-col" : "flex-row"} items-center gap-3 p-3 rounded-lg transition-colors
-                      ${activeTab === item.id ? "bg-blue-600 text-white shadow-md" : "hover:bg-slate-50 text-slate-600"}
-                      ${isCollapsed ? "justify-center" : ""}
-                    `}
-                    title={isCollapsed ? item.label : ""}
-                  >
-                    <span className="flex-shrink-0">{item.icon}</span>
-                    {!isCollapsed && (
-                      <div className="flex-1 text-left">
-                        <div className="font-medium">{item.label}</div>
-                        <div className={`text-xs mt-0.5 ${activeTab === item.id ? "text-blue-100" : "opacity-75"}`}>
-                          {item.description}
-                        </div>
-                      </div>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
+
+          {/* Condition updated to check visibleCategories instead of menuItems */}
+          {visibleCategories.length > 0 ? (
+            visibleCategories.map((category) => {
+              const items = groupedTools[category];
+
+              return (
+                <div key={category} className="mb-6">
+                  {!isCollapsed && (
+                    <h3 className="px-2 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                      {category}
+                    </h3>
+                  )}
+
+                  <ul className="space-y-2">
+                    {items.map((item) => (
+                      <li key={item.id}>
+                        <button
+                          onClick={() => handleNavigation(item.id)}
+                          className={`
+                            w-full flex ${
+                              isCollapsed ? "flex-col" : "flex-row"
+                            } items-center gap-3 p-3 rounded-lg transition-colors
+                            ${
+                              activeTab === item.id
+                                ? "bg-blue-600 text-white shadow-lg"
+                                : "hover:bg-slate-50 text-slate-600"
+                            }
+                            ${isCollapsed ? "justify-center" : ""}
+                          `}
+                          title={isCollapsed ? item.label : ""}
+                        >
+                          <span className="flex-shrink-0">
+                            {/* Safely render the icon whether it's an element or component */}
+                            {typeof item.icon === "function" ? (
+                              <item.icon className="w-5 h-5" />
+                            ) : React.isValidElement(item.icon) ? (
+                              React.cloneElement(item.icon, { className: "w-5 h-5" })
+                            ) : null}
+                          </span>
+
+                          {!isCollapsed && (
+                            <div className="flex-1 text-left">
+                              <div className="font-medium">{item.label}</div>
+                              <div className="text-xs opacity-75 mt-0.5">
+                                {item.description}
+                              </div>
+                            </div>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ); 
+            })
           ) : (
             <div className="text-center text-slate-500 py-4">
               No tools found

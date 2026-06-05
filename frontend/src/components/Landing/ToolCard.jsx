@@ -19,6 +19,90 @@ const pdfWatermarkAnimation = (
     </div>
   </div>
 );
+const markdownToHtmlAnimation = (
+  <div className="tc-scene flex items-center justify-center">
+    <div className="relative w-[72px] h-[44px]">
+
+      {/* Markdown Card */}
+      <div
+        className="
+          absolute left-0 top-1/2 -translate-y-1/2
+          w-[30px] h-[38px]
+          rounded-[5px]
+          border border-[#7F77DD]
+          bg-[#F6F4FF]
+          flex items-center justify-center
+          transition-all duration-500 ease-out
+          group-hover:-translate-x-3
+          group-hover:rotate-[-8deg]
+          group-hover:opacity-0
+        "
+      >
+        <span className="text-[8px] font-bold text-[#534AB7]">
+          MD
+        </span>
+      </div>
+
+      {/* Arrow */}
+      <div
+        className="
+          absolute left-1/2 top-1/2
+          -translate-x-1/2 -translate-y-1/2
+          transition-all duration-500
+          group-hover:opacity-0
+          group-hover:scale-150
+        "
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M5 12H19M19 12L13 6M19 12L13 18"
+            stroke="#7F77DD"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+
+      {/* HTML Card */}
+      <div
+        className="
+          absolute right-0 top-1/2 -translate-y-1/2
+          w-[30px] h-[38px]
+          rounded-[5px]
+          border border-[#EF9F27]
+          bg-[#FFF8EC]
+          flex items-center justify-center
+          opacity-80
+          transition-all duration-500 ease-out
+          group-hover:right-[21px]
+          group-hover:scale-110
+          group-hover:shadow-md
+        "
+      >
+        <span className="text-[7px] font-bold text-[#C97200]">
+          HTML
+        </span>
+      </div>
+
+      {/* Floating Code */}
+      <div
+        className="
+          absolute left-1/2 top-1/2
+          -translate-x-1/2 -translate-y-1/2
+          opacity-0
+          transition-all duration-500 ease-out
+          group-hover:opacity-100
+          group-hover:-translate-y-6
+        "
+      >
+        <span className="text-[8px] font-bold text-[#EF9F27]">
+          {"</>"}
+        </span>
+      </div>
+    </div>
+  </div>
+);
 
 const imageWatermarkAnimation = (
   <div className="tc-scene tc-image-watermark-scene flex items-center justify-center">
@@ -424,6 +508,7 @@ const toolAnimations = {
       </div>
     </div>
   ),
+  
 
   "image-to-webp": (
     <div className="tc-scene tc-webp-scene">
@@ -749,6 +834,8 @@ const toolAnimations = {
       </div>
     </div>
   ),
+
+  "md-to-html": markdownToHtmlAnimation,
 
   "image-ocr": imageOcrAnimation,
 

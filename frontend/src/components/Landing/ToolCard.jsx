@@ -19,11 +19,100 @@ const pdfWatermarkAnimation = (
     </div>
   </div>
 );
+
+const urlToQrAnimation = (
+  <div className="tc-scene flex items-center justify-center">
+    <div className="relative w-[70px] h-[50px]">
+
+      {/* URL Bar */}
+      <div
+        className="
+          absolute left-1/2 top-1/2
+          -translate-x-1/2 -translate-y-1/2
+          w-[52px] h-[18px]
+          rounded-full
+          bg-[#E6F1FB]
+          border border-[#85B7EB]
+          flex items-center px-[7px]
+          transition-all duration-500
+          group-hover:opacity-0
+          group-hover:scale-75
+          group-hover:-translate-y-2
+        "
+      >
+        <div className="w-[4px] h-[4px] rounded-full bg-[#378ADD] mr-[5px]" />
+        <span className="text-[6px] font-semibold text-[#378ADD]">
+          w w w..
+        </span>
+      </div>
+
+      {/* QR Card */}
+      <div
+        className="
+          absolute left-1/2 top-1/2
+          -translate-x-1/2 -translate-y-1/2
+          w-[42px] h-[42px]
+          rounded-[6px]
+          bg-white
+          border border-[#85B7EB]
+          shadow-sm
+          flex items-center justify-center
+          opacity-0
+          scale-75
+          rotate-6
+          transition-all duration-500
+          group-hover:opacity-100
+          group-hover:scale-100
+          group-hover:rotate-0
+        "
+      >
+        <svg viewBox="0 0 40 40" width="28" height="28">
+          {/* Finder 1 */}
+          <rect x="2" y="2" width="10" height="10" rx="1" fill="#378ADD" />
+          <rect x="5" y="5" width="4" height="4" fill="white" />
+
+          {/* Finder 2 */}
+          <rect x="28" y="2" width="10" height="10" rx="1" fill="#378ADD" />
+          <rect x="31" y="5" width="4" height="4" fill="white" />
+
+          {/* Finder 3 */}
+          <rect x="2" y="28" width="10" height="10" rx="1" fill="#378ADD" />
+          <rect x="5" y="31" width="4" height="4" fill="white" />
+
+          {/* QR Pattern */}
+          <rect x="18" y="4" width="3" height="3" fill="#1D9E75" />
+          <rect x="22" y="8" width="3" height="3" fill="#1D9E75" />
+          <rect x="18" y="12" width="3" height="3" fill="#1D9E75" />
+          <rect x="24" y="16" width="3" height="3" fill="#1D9E75" />
+          <rect x="16" y="18" width="3" height="3" fill="#1D9E75" />
+          <rect x="22" y="22" width="3" height="3" fill="#1D9E75" />
+          <rect x="28" y="18" width="3" height="3" fill="#1D9E75" />
+          <rect x="18" y="26" width="3" height="3" fill="#1D9E75" />
+          <rect x="24" y="30" width="3" height="3" fill="#1D9E75" />
+        </svg>
+
+        {/* Success Badge */}
+        <div
+          className="
+            absolute -top-[4px] -right-[4px]
+            w-[14px] h-[14px]
+            rounded-full
+            bg-[#1D9E75]
+            text-white
+            text-[8px]
+            flex items-center justify-center
+            font-bold
+          "
+        >
+          ✓
+        </div>
+      </div>
+    </div>
+  </div>
+);
 const markdownToHtmlAnimation = (
   <div className="tc-scene flex items-center justify-center">
     <div className="relative w-[72px] h-[44px]">
-
-      {/* Markdown Card */}
       <div
         className="
           absolute left-0 top-1/2 -translate-y-1/2
@@ -42,8 +131,6 @@ const markdownToHtmlAnimation = (
           MD
         </span>
       </div>
-
-      {/* Arrow */}
       <div
         className="
           absolute left-1/2 top-1/2
@@ -63,8 +150,6 @@ const markdownToHtmlAnimation = (
           />
         </svg>
       </div>
-
-      {/* HTML Card */}
       <div
         className="
           absolute right-0 top-1/2 -translate-y-1/2
@@ -84,8 +169,6 @@ const markdownToHtmlAnimation = (
           HTML
         </span>
       </div>
-
-      {/* Floating Code */}
       <div
         className="
           absolute left-1/2 top-1/2
@@ -848,6 +931,8 @@ const toolAnimations = {
   "pdf-watermark": pdfWatermarkAnimation,
 
   "image-watermark": imageWatermarkAnimation,
+
+  "url-to-qr": urlToQrAnimation,
 
   "image-blur": (
     <div className="tc-scene tc-blur-scene flex items-center justify-center">

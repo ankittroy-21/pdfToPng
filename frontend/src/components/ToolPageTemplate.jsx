@@ -1,5 +1,5 @@
-import React, { useState, useCallback, lazy, Suspense } from "react";import { useFileUpload } from "../hooks/useFileUpload";
-
+import React, { useState, useCallback, lazy, Suspense } from "react";
+import { useFileUpload } from "../hooks/useFileUpload";
 
 const FileUploadArea = lazy(() => import("./FileUploadArea"));
 
@@ -16,6 +16,7 @@ const ToolPageTemplate = ({
   submitButtonText = "Submit",
   loadingButtonText = "Processing...",
   onSuccessMessage,
+  onSuccess, // New prop for callback
   getDownloadFilename,
   extraFields,
   extraContent,
@@ -26,7 +27,7 @@ const ToolPageTemplate = ({
   supportText,
   inputId = "file-input",
 }) => {
-  const [statusType, setStatusType] = useState("info"); // info, success, error
+  const [statusType, setStatusType] = useState("info");
 
   const internalValidate = useCallback(
     async (selectedFile) => {
@@ -125,7 +126,13 @@ const ToolPageTemplate = ({
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
 
-        setStatusMessage(onSuccessMessage || "Success! File downloaded.");
+        // Call onSuccess callback if provided
+        if (onSuccess) {
+          const customMessage = onSuccess(blob, file.name);
+          setStatusMessage(customMessage || (onSuccessMessage || "Success! File downloaded."));
+        } else {
+          setStatusMessage(onSuccessMessage || "Success! File downloaded.");
+        }
         setStatusType("success");
       } else {
         const errorData = await response.json().catch(() => ({}));

@@ -1,12 +1,20 @@
 import { useCallback, useState } from "react";
 import ToolPageTemplate from "../components/ToolPageTemplate";
 import { Sliders, Zap, ShieldCheck, Maximize } from "lucide-react";
+import { formatFileSize, calculateSavedPercentage } from "../utils/fileSizeFormatter";
 
 function ImageCompress() {
   const [quality, setQuality] = useState(70);
+  const [originalSize, setOriginalSize] = useState(null);
+  const [convertedSize, setConvertedSize] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
 
   const validateFile = useCallback((selectedFile) => {
     if (selectedFile && selectedFile.type.startsWith("image/")) {
+      setOriginalSize(selectedFile.size);
+      setConvertedSize(null);
+      setUploadedFile(selectedFile);
+      
       return {
         isValid: true,
         message: `File "${selectedFile.name}" selected (${(
@@ -30,8 +38,14 @@ function ImageCompress() {
     formData.append("quality", quality);
   };
 
+  const onSuccess = (responseBlob, originalFileName) => {
+    setConvertedSize(responseBlob.size);    
+    return `Success! Image compressed with ${quality}% quality.`;
+  };
+
   const extraFields = ({ file }) => {
     if (!file) return null;
+    
     return (
       <div className="w-full max-w-[500px] mb-8 p-6 bg-white rounded-xl shadow-sm border border-gray-100 text-left">
         <div className="flex justify-between items-center mb-4">
@@ -74,6 +88,42 @@ function ImageCompress() {
             </button>
           ))}
         </div>
+
+        {/* File Size Comparison Display */}
+        {(convertedSize && originalSize) && (
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">📊 File Size Comparison</h4>
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Original:</span>
+                <span className="font-medium text-gray-700">{formatFileSize(originalSize)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Compressed:</span>
+                <span className="font-medium text-green-600">{formatFileSize(convertedSize)}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t border-gray-100">
+                <span className="text-gray-500">Saved:</span>
+                <span className={`font-bold ${
+                  calculateSavedPercentage(originalSize, convertedSize) > 0 
+                    ? "text-green-600" 
+                    : "text-red-600"
+                }`}>
+                  {formatFileSize(originalSize - convertedSize)} 
+                  ({calculateSavedPercentage(originalSize, convertedSize).toFixed(1)}% 
+                  {calculateSavedPercentage(originalSize, convertedSize) > 0 ? "↓" : "↑"})
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Show message if converted but no display */}
+        {(!convertedSize && originalSize) && (
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <p className="text-sm text-gray-500">Click "Compress Image" to see file size comparison.</p>
+          </div>
+        )}
       </div>
     );
   };
@@ -95,7 +145,7 @@ function ImageCompress() {
       }}
       submitButtonText="Compress Image"
       loadingButtonText="Compressing..."
-      onSuccessMessage={`Success! Image compressed with ${quality}% quality.`}
+      onSuccess={onSuccess}
       extraFields={extraFields}
       maxWidthClass="max-w-[700px]"
       defaultIcon={<Sliders className="w-16 h-16" />}
